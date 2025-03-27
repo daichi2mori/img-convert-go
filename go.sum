@@ -2,6 +2,10 @@ github.com/ebitengine/purego v0.8.2 h1:jPPGWs2sZ1UgOSgD2bClL0MJIqu58nOmIcBuXr62z
 github.com/ebitengine/purego v0.8.2/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
 github.com/gen2brain/avif v0.4.3 h1:pxpXOCIA4YfB6wxDagbNCpXdTh5/1q3huedPx0arqwA=
 github.com/gen2brain/avif v0.4.3/go.mod h1:L0hvma2Pwz8HWgE3w7KkRIUYxnVEZ94ZfVQGKwaIQ40=
+github.com/gen2brain/jpegli v0.3.4 h1:wFoUHIjfPJGGeuW3r9dqy0MTT1TtvJuWf6EqfHPPGFM=
+github.com/gen2brain/jpegli v0.3.4/go.mod h1:tVnF7NPyufTo8noFlW5lurUUwZW8trwBENOItzuk2BM=
+github.com/gen2brain/jpegxl v0.4.4 h1:d3N8xvDvKoaancSnkIyQBrSHTnbjhb9iajljiRTAFak=
+github.com/gen2brain/jpegxl v0.4.4/go.mod h1:srG5W0zWofkpzWYAv3HldaSghHs4+3F0VjnL8ohpkm8=
 github.com/gen2brain/webp v0.5.4 h1:edPfjyt9vU9A+VMQCg7uKz/A2Jjle+yP20ZPqZH3l6s=
 github.com/gen2brain/webp v0.5.4/go.mod h1:kEFkGdK1wG9ePKj9ylcLUrMQfqevXGTpVq1S8lZL0j4=
 github.com/tetratelabs/wazero v1.9.0 h1:IcZ56OuxrtaEz8UYNRHBrUa9bYeX9oVY93KspZZBf/I=
