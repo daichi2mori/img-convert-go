@@ -15,8 +15,8 @@ import (
 )
 
 func main() {
-	inputFile := `C:\Users\daich\Dropbox\Hentai\comic\ホークビット (孝至)\聖騎士長レオン\0001.jpg`
-	outputPath := `E:\webp`
+	inputFile := "test.jpg"
+	outputPath := `C:\Users\user\Desktop\test`
 	convert := "jpegxl"
 	quality := 50
 
