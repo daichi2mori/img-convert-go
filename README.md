@@ -182,3 +182,21 @@
 - **ChromaSubsampling**
 
   指定できる値: `image.YCbCrSubsampleRatio444`, `image.YCbCrSubsampleRatio422`, `image.YCbCrSubsampleRatio420`
+
+## リサイズ補完アルゴリズム
+
+- **Nearest Neighbor**
+
+高速だけど、画質が荒い。
+
+- **Approx BiLinear**
+
+画質が悪くなるが、速度は早い。
+
+- **Bilinear**
+
+画質は良くなるが、処理が重い。
+
+- **Catmull Rom**
+
+処理が重いが、画質は良い。

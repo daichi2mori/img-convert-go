@@ -7,18 +7,26 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gen2brain/avif"
 	"github.com/gen2brain/jpegli"
 	"github.com/gen2brain/jpegxl"
 	"github.com/gen2brain/webp"
+	"golang.org/x/image/draw"
 )
 
 func main() {
 	inputFile := "test.jpg"
-	outputPath := `C:\Users\user\Desktop\test`
-	convert := "jpegxl"
+	outputPath := `output`
+	convert := "jpegxl" // "jpg", "jpegli", "jpegxl", "png", "webp", "avif"
 	quality := 50
+
+	// リサイズ関連のパラメータ
+	resize := false              // リサイズするかどうか
+	resizeWidth := 0             // リサイズ後の幅（0の場合はアスペクト比を維持）
+	resizeHeight := 1024         // リサイズ後の高さ（0の場合はアスペクト比を維持）
+	resizeMethod := "CatmullRom" // リサイズメソッド: "NearestNeighbor", "ApproxBiLinear", "Bilinear", "CatmullRom"
 
 	jpgOptions := jpeg.Options{
 		Quality: quality,
@@ -64,6 +72,15 @@ func main() {
 		return
 	}
 
+	// リサイズが有効な場合は画像をリサイズ
+	if resize {
+		img, err = resizeImage(img, resizeWidth, resizeHeight, resizeMethod)
+		if err != nil {
+			fmt.Printf("画像のリサイズに失敗しました: %v\n", err)
+			return
+		}
+	}
+
 	switch convert {
 	case "jpg", "jpeg":
 		convertToJPEG(inputFile, outputPath, img, jpgOptions)
@@ -93,10 +110,10 @@ func loadImage(filePath string) (image.Image, error) {
 	}
 	defer file.Close()
 
-	extension := filepath.Ext(filePath)
+	ext := strings.ToLower(filepath.Ext(filePath))
 	var img image.Image
 
-	switch extension {
+	switch ext {
 	case ".jpg", ".jpeg":
 		img, err = jpegli.Decode(file)
 	case ".jxl":
@@ -108,13 +125,57 @@ func loadImage(filePath string) (image.Image, error) {
 	case ".avif":
 		img, err = avif.Decode(file)
 	default:
-		return nil, fmt.Errorf("サポートされていないファイル形式です: %s", extension)
+		return nil, fmt.Errorf("サポートされていないファイル形式です: %s", ext)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("画像のデコードに失敗しました: %v", err)
 	}
 
 	return img, nil
+}
+
+// 画像をリサイズする関数
+func resizeImage(img image.Image, width, height int, method string) (image.Image, error) {
+	bounds := img.Bounds()
+	srcWidth := bounds.Dx()
+	srcHeight := bounds.Dy()
+
+	// 幅または高さが0の場合、アスペクト比を維持
+	if width == 0 && height == 0 {
+		return nil, fmt.Errorf("幅と高さの両方が0です")
+	} else if width == 0 {
+		width = srcWidth * height / srcHeight
+	} else if height == 0 {
+		height = srcHeight * width / srcWidth
+	}
+
+	// 元の画像と同じサイズの場合は何もしない
+	if width == srcWidth && height == srcHeight {
+		return img, nil
+	}
+
+	// 新しい画像を作成
+	dst := image.NewRGBA(image.Rect(0, 0, width, height))
+
+	// リサイズメソッドを選択
+	var scaler draw.Scaler
+	switch strings.ToLower(method) {
+	case "NearestNeighbor":
+		scaler = draw.NearestNeighbor
+	case "ApproxBiLinear":
+		scaler = draw.ApproxBiLinear
+	case "Bilinear":
+		scaler = draw.BiLinear
+	case "CatmullRom":
+		scaler = draw.CatmullRom
+	default:
+		scaler = draw.ApproxBiLinear
+	}
+
+	// リサイズを実行
+	scaler.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Over, nil)
+
+	return dst, nil
 }
 
 // 出力ファイル名を生成
