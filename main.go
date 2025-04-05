@@ -13,20 +13,20 @@ import (
 	"github.com/gen2brain/jpegli"
 	"github.com/gen2brain/jpegxl"
 	"github.com/gen2brain/webp"
-	"golang.org/x/image/draw"
+	"github.com/nfnt/resize"
 )
 
 func main() {
 	inputFile := "test.jpg"
 	outputPath := `output`
-	convert := "jpegxl" // "jpg", "jpegli", "jpegxl", "png", "webp", "avif"
+	convert := "avif" // "jpg", "jpegli", "jpegxl", "png", "webp", "avif"
 	quality := 50
 
 	// リサイズ関連のパラメータ
-	resize := false              // リサイズするかどうか
-	resizeWidth := 0             // リサイズ後の幅（0の場合はアスペクト比を維持）
-	resizeHeight := 1024         // リサイズ後の高さ（0の場合はアスペクト比を維持）
-	resizeMethod := "CatmullRom" // リサイズメソッド: "NearestNeighbor", "ApproxBiLinear", "Bilinear", "CatmullRom"
+	resize := true             // リサイズするかどうか
+	resizeWidth := 0           // リサイズ後の幅（0の場合はアスペクト比を維持）
+	resizeHeight := 1024       // リサイズ後の高さ（0の場合はアスペクト比を維持）
+	resizeMethod := "lanczos3" // リサイズメソッド: "nearest", "bilinear", "bicubic", "mitchellnetravali", "lanczos2", "lanczos3"
 
 	jpgOptions := jpeg.Options{
 		Quality: quality,
@@ -38,7 +38,7 @@ func main() {
 		ProgressiveLevel:     0,
 		OptimizeCoding:       true,
 		AdaptiveQuantization: true,
-		StandardQuantTables:  false,
+		StandardQuantTables:  true,
 		FancyDownsampling:    true,
 		DCTMethod:            jpegli.DCTFloat,
 	}
@@ -61,8 +61,8 @@ func main() {
 
 	avifOptions := avif.Options{
 		Quality:           quality,
-		QualityAlpha:      0,
-		Speed:             0,
+		QualityAlpha:      1,
+		Speed:             1,
 		ChromaSubsampling: image.YCbCrSubsampleRatio420,
 	}
 
@@ -72,7 +72,6 @@ func main() {
 		return
 	}
 
-	// リサイズが有効な場合は画像をリサイズ
 	if resize {
 		img, err = resizeImage(img, resizeWidth, resizeHeight, resizeMethod)
 		if err != nil {
@@ -143,10 +142,6 @@ func resizeImage(img image.Image, width, height int, method string) (image.Image
 	// 幅または高さが0の場合、アスペクト比を維持
 	if width == 0 && height == 0 {
 		return nil, fmt.Errorf("幅と高さの両方が0です")
-	} else if width == 0 {
-		width = srcWidth * height / srcHeight
-	} else if height == 0 {
-		height = srcHeight * width / srcWidth
 	}
 
 	// 元の画像と同じサイズの場合は何もしない
@@ -154,28 +149,30 @@ func resizeImage(img image.Image, width, height int, method string) (image.Image
 		return img, nil
 	}
 
-	// 新しい画像を作成
-	dst := image.NewRGBA(image.Rect(0, 0, width, height))
-
 	// リサイズメソッドを選択
-	var scaler draw.Scaler
+	var filter resize.InterpolationFunction
 	switch strings.ToLower(method) {
-	case "NearestNeighbor":
-		scaler = draw.NearestNeighbor
-	case "ApproxBiLinear":
-		scaler = draw.ApproxBiLinear
-	case "Bilinear":
-		scaler = draw.BiLinear
-	case "CatmullRom":
-		scaler = draw.CatmullRom
+	case "nearest":
+		filter = resize.NearestNeighbor
+	case "bilinear":
+		filter = resize.Bilinear
+	case "bicubic":
+		filter = resize.Bicubic
+	case "mitchellnetravali":
+		filter = resize.MitchellNetravali
+	case "lanczos2":
+		filter = resize.Lanczos2
+	case "lanczos3":
+		filter = resize.Lanczos3
 	default:
-		scaler = draw.ApproxBiLinear
+		filter = resize.Lanczos3
 	}
 
 	// リサイズを実行
-	scaler.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Over, nil)
+	// resize.Resize関数はwidthまたはheightが0の場合、アスペクト比を自動的に維持する
+	resized := resize.Resize(uint(width), uint(height), img, filter)
 
-	return dst, nil
+	return resized, nil
 }
 
 // 出力ファイル名を生成

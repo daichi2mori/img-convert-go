@@ -7,7 +7,7 @@ require (
 	github.com/gen2brain/jpegli v0.3.4
 	github.com/gen2brain/jpegxl v0.4.4
 	github.com/gen2brain/webp v0.5.4
-	golang.org/x/image v0.25.0
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 )
 
 require (
